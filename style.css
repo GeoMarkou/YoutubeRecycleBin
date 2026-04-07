@@ -1,0 +1,372 @@
+/* Basic CSS Reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html, body {
+    height: 100%;
+    font-family: sans-serif;
+}
+
+
+ul, ol {
+    font-size: 1rem;
+    margin-left: 2rem;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+}
+
+table {
+    border-collapse: collapse;
+    border-spacing: 0;
+}
+
+img {
+    max-width: 100%;
+    display: block;
+}
+/* End reset */
+
+/* General */
+:root {
+    --body-bg: #f8fafd;
+    --page-bg: #fff;
+    --page-border: #c7c7c7;
+    --theme: #007bff;
+}
+
+body {
+    padding: 2rem;
+    background-color: var(--body-bg);
+}
+
+main {
+    background-color: var(--page-bg);
+    outline: 1px solid var(--page-border);
+    max-width: 60rem;
+    margin: auto;
+    padding: 1rem;
+}
+
+h1, h2, h3 {
+    margin-bottom: 1rem;
+    margin-top: 1rem;
+}
+
+h1 sub, h2 sub, h3 sub {
+    margin-top: -0.5em;
+    display: block;
+    font-size: 0.6em;
+}
+
+p {
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+}
+
+.legend ul {
+    font-family: monospace;
+    list-style: none;
+    margin-top: 0;
+}
+
+button {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.9rem;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-family: inherit;
+    background-color: #eee;
+}
+
+nav ul {
+    list-style: decimal;
+    margin-left: 2rem;
+}
+
+    nav ul ul {
+        list-style: lower-alpha;
+        margin-top: 0;
+        margin-bottom: 0;
+    }
+
+    nav ul ul ul {
+        list-style: lower-roman;
+    }
+
+/* Tables */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: inherit;
+    font-size: 1rem;
+    table-layout: auto;
+}
+
+    table thead {
+        background-color: #f4f4f4;
+    }
+
+    table th, table td {
+        text-align: left;
+        padding: 0.25rem 0.5rem;
+        border-bottom: 1px solid #eee;
+    }
+
+    table th {
+        border-bottom: 2px solid #ccc;
+        border-top: 2px solid #ccc;
+        position: sticky;
+        top: 0;
+        background-color: #f4f4f4;
+        z-index: 2;
+    }
+
+    table tbody th {
+        top: 1.8em;
+        z-index: 3;
+    }
+
+    table th h3 {
+        font-size: inherit;
+        margin: 0;
+    }
+
+    table tbody td:not(:last-child) {
+        border-right: 1px solid #ccc; 
+    }
+
+    table tbody tr:nth-child(even) {
+        background-color: #fafafa;
+    }
+
+    table tbody tr:hover {
+        background-color: #f0f8ff;
+    }
+
+    table .table-wrapper {
+        overflow-x: auto;
+    }
+
+    /* Table data specific */
+    table td.keyphrase, table td.example {
+        font-family: monospace;
+    }
+
+    table td.example:empty::before {
+        content: '...';
+    }
+
+    table td var {
+        color: #814fba;
+        font-style: inherit;
+        display: inline;
+    }
+
+    table td var::before {
+        display: none;
+    }
+
+    table td var:hover {
+        position: relative;
+    }
+
+    table td var:hover::before {
+        display: unset;
+        position: absolute;
+        pointer-events: none;
+        top: 90%;
+        left: 95%;
+        width: 15em;
+        min-height: 4em;
+        background: white;
+        color: black;
+        border: 1px solid black;
+        border-radius: 5px;
+        border-top-left-radius: 0;
+    }
+
+    table td var[data-min]::before {
+        content: ">" attr(data-min);
+    }
+
+    table td var[data-max]::before {
+        content: "<" attr(data-max);
+    }
+
+    table td var[data-min][data-max]::before {
+        content: attr(data-min) " to " attr(data-max);
+    }
+
+    table td var[data-min]::after, table td var[data-max]::after {
+        content: "*";
+        font-size: 0.8rem;
+        vertical-align: top;
+        line-height: 0;
+    }
+
+    table td.credit {
+        max-width: 8rem;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        font-size: 0.8rem;
+    }
+
+    table td.credit[title] {
+        cursor: help;
+    }
+
+    table td.generate button {
+        transition: background-color 0.2s;
+        background-color: var(--theme);
+        color: white;
+    }
+
+    table td.generate button:hover, table td.generate button:focus {
+        background-color: #005ecb;
+    }
+
+    table td.generate button:active {
+        background-color: #004a9c;
+    }
+
+    table td.generate button:focus {
+        outline-offset: 2px;
+    }
+
+    table td.generate button[disabled] {
+        background-color: rgb(161, 161, 161);
+    }
+
+    table .credit, table .generate {
+        width: 8rem;
+    }
+
+    table .info {
+        width: 10rem;
+    }
+
+    table .info strong {
+        color: red;
+    }
+
+/* Dialog */
+dialog {
+    border: none;
+    border-radius: 1rem;
+    padding: 2rem;
+    max-width: 40rem;
+    width: 90%;
+    font-family: inherit;
+    box-shadow: 0 1rem 4rem rgba(0, 0, 0, 0.2);
+    margin: auto;
+}
+
+    dialog::backdrop {
+        background-color: rgba(0, 0, 0, 0.4);
+    }
+
+    dialog form {
+        min-height: 10rem;
+    }
+
+    dialog label {
+        display: flex;
+        flex-direction: column;
+        font-size: 0.9rem;
+        gap: 1rem;
+    }
+
+    dialog input {
+        padding: 0.25rem 0.5rem;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        font-size: 1rem;
+        outline-offset: 0px !important;
+        width: 0;
+    }
+
+    dialog input[type="date"] {
+        width: 10em;
+    }
+
+    dialog input[type="time"] {
+        width: 6em;
+    }
+
+    dialog input[type="time"][step="60"] {
+        width: 8em;
+    }
+
+    dialog input[type="time"][step="1"] {
+        width: 10em;
+    }
+
+    dialog .inputs > :not(:first-child) {
+        margin-left: 0.25em;
+    }
+
+    dialog .inputs > * {
+        display: inline;
+    }
+
+    dialog menu {
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+        padding: 0;
+        margin: 0;
+        margin-top: 1rem;
+    }
+
+    dialog button {
+        padding: 0.5rem 0.75rem;
+    }
+
+    dialog button.next {
+        background-color: var(--theme);
+        color: white;
+    }
+
+    dialog button.close {
+        position: absolute;
+        top: 0.5rem;
+        right: 0.5rem;
+        width: 2rem;
+        padding: 0.5rem;
+        height: 2rem;
+        line-height: 1rem;
+    }
+
+    dialog button:hover {
+        filter: brightness(0.95);
+    }
+
+    dialog input:focus,
+    dialog button:focus {
+        outline: 2px solid var(--theme);
+        outline-offset: 2px;
+    }
+
+    dialog fieldset {
+        border: none;
+        outline: none;
+    }
+
+/* Small screens */
+@media (max-width: 800px) {
+    body {
+        padding: 0;
+    }
+
+    main {
+        padding: 0.5rem;
+    }
+
+    table .example, table .info {
+        display: none;
+    }
+}
