@@ -2,7 +2,6 @@
 
 /*
 todo:
-copy more data from doc
 with xxxx formats, should we always pad start with 0's? unknown, needs confirmation
 
 stretch:
@@ -36,12 +35,14 @@ class MainPage {
         /** @type {HTMLTableCellElement[]} */
         const genDivs = [ ...document.querySelectorAll('td.generate') ];
         for (let ele of genDivs) {
+            const parentRow = ele.closest('tr');
+
             // Add NSFW warning on click link
-            const isNSFW = !!ele.parentElement.querySelector('td.info strong')
+            const isNSFW = !!parentRow.querySelector('td.info strong')
 
             // No point creating a fancy button for no variables
-            if (!ele.parentElement.querySelector('td.keyphrase var')) {
-                const rowKeyHTML = ele.parentElement.querySelector('td.keyphrase').innerHTML;
+            if (!parentRow.querySelector('td.keyphrase var')) {
+                const rowKeyHTML = parentRow.querySelector('td.keyphrase').innerHTML;
                 const genLink = document.createElement('a');
                 genLink.target = '_blank';
                 genLink.innerText = 'Open ↗️';
@@ -87,9 +88,10 @@ class MainPage {
     generateLinkClick (ev) {
         /** @type {HTMLElement} */
         const target = ev.currentTarget;
+        const parentRow = target.closest('tr');
 
         // Add NSFW warning on click link
-        const isNSFW = !!target.parentElement.querySelector('td.info strong')
+        const isNSFW = !!parentRow.querySelector('td.info strong')
         if (isNSFW) {
             if (this.warnBeforeOpenNSFW(ev) === false) {
                 return false;
@@ -123,7 +125,7 @@ class MainPage {
         }
         
         const genDialogClose = genDialog.querySelector('button.close');
-        this.dialogState = new DialogState(phraseParts);
+        this.dialogState = new DialogState(phraseParts, parentRow);
         genDialog.onclose = () => delete this.dialogState;
         genDialogClose.onclick = () => genDialog.close();
     };
@@ -143,6 +145,9 @@ class DialogState {
 
     /** @type {HTMLFormElement} */
     formEle = genDialog.querySelector('form');
+
+    /** @type {HTMLQuoteElement} */
+    subtitle = genDialog.querySelector('.subtitle');
 
     /** @type {HTMLDivElement} */
     outputEle = genDialog.querySelector('output');
@@ -168,8 +173,8 @@ class DialogState {
     /** @type {HTMLDivElement} */
     page2 = genDialog.querySelector('.page2');
 
-    /** @param {Array<KeyVariableType>} parts */
-    constructor(parts) {
+    /** @param {Array<KeyVariableType>} parts; @param {HTMLTableRowElement} clickedRow */
+    constructor(parts, clickedRow) {
         this.parts = parts;
 
         this.rerollBtn.onclick = this.reroll.bind(this);
@@ -264,6 +269,24 @@ class DialogState {
             }
         }
 
+        // Configure the subtitle info
+        this.subtitle.innerHTML = `
+            <dl>
+                <div>
+                    <dt>Keyphrase:</dt>
+                    <dd>${clickedRow.querySelector('.keyphrase').innerHTML}</dd>
+                </div>
+                <div>
+                    <dt>Info:</dt>
+                    <dd>${clickedRow.querySelector('.info').innerHTML}</dd>
+                </div>
+                <div>
+                    <dt>Credit:</dt>
+                    <dd>${clickedRow.querySelector('.credit').innerHTML}</dd>
+                </div>
+            </dl>
+        `;
+
         this.setOutputState('default');
         this.formEle.onsubmit = (e) => e.preventDefault();
         genDialog.showModal();
@@ -301,7 +324,7 @@ class DialogState {
         }
 
         Utils.playSound('morrowindWhoosh');
-        
+
         let newParams = [];
         for (let i = 0; i < this.parts.length; i++) {
             /** @type {HTMLInputElement} */

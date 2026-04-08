@@ -165,7 +165,7 @@ table {
         content: '...';
     }
 
-    table td var {
+    table td var, dialog .subtitle var {
         color: #814fba;
         font-style: inherit;
         display: inline;
@@ -262,7 +262,7 @@ table {
         width: 10rem;
     }
 
-    table .info strong {
+    table .info strong, dialog .subtitle strong {
         color: red;
     }
 
@@ -284,6 +284,26 @@ dialog {
 
     dialog .page1, dialog .page2 {
         min-height: 10rem;
+    }
+
+    dialog .subtitle dl {
+        display: table;
+    }
+
+    dialog .subtitle dl > div {
+        display: table-row;
+    }
+
+    dialog .subtitle dt, dialog .subtitle dd {
+        display: table-cell;
+    }
+
+    dialog .subtitle dd {
+        padding-left: 0.5em;
+    }
+
+    dialog .subtitle dl > div:has(dd:empty) {
+        display: none;
     }
 
     dialog label {
@@ -380,6 +400,13 @@ dialog {
     }
 
     table .example, table .info {
+        display: none;
+    }
+}
+
+/* tiny screens */
+@media (max-width: 500px) {
+    table .credit {
         display: none;
     }
 }
