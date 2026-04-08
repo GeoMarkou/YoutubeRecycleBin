@@ -97,6 +97,11 @@ nav ul {
         list-style: lower-roman;
     }
 
+footer {
+    text-align: center;
+    margin-top: 1em;
+}
+
 /* Tables */
 table {
     width: 100%;
@@ -180,13 +185,21 @@ table {
         pointer-events: none;
         top: 90%;
         left: 95%;
-        width: 15em;
+        width: 10em;
         min-height: 4em;
         background: white;
         color: black;
         border: 1px solid black;
-        border-radius: 5px;
+        background-color: rgba(30, 30, 30, 0.95);
+        color: white;
+        padding: 0.5em;
+        border-radius: 6px;
         border-top-left-radius: 0;
+        font-size: 0.8rem;
+        line-height: 1.3;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        z-index: 10;
+        white-space: pre;
     }
 
     table td var[data-min]::before {
@@ -198,7 +211,7 @@ table {
     }
 
     table td var[data-min][data-max]::before {
-        content: attr(data-min) " to " attr(data-max);
+        content: ">" attr(data-min) "\A<" attr(data-max);
     }
 
     table td var[data-min]::after, table td var[data-max]::after {
