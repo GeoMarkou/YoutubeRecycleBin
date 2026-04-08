@@ -2,13 +2,8 @@
 
 /*
 todo:
-more data
-YYYY MM
-MMMM D, YYYY
-YYMMDD
-MMMM DD, YYYY
-DD MMM
-Not hard coded formats - auto detect length
+copy more data from doc
+with xxxx formats, should we always pad start with 0's? unknown, needs confirmation
 
 stretch:
 min/max config for random dice roll
@@ -18,19 +13,15 @@ ability to roll individual fields instead of "reroll all"
 sorting columns
 */
 
-/** @typedef {'YYYYMMDD'|'YYYY-MM-DD'|'YYYY MM DD'} SupportedDateFormats */
-/** @typedef {'HHMMSS'|'HH:MM:SS'} SupportedTimeFormats */
-/** @typedef {'X'|'XX'|'XXX'|'XXXX'} SupportedNumberFormats */
-/** @typedef {'F'|'FF'|'FFF'} SupportedHexadecimalFormats */
-/** @typedef {'A'} SupportedAlphabeticalFormats */
 /** @typedef {{ dataType: 'raw'; text: string; }} KeyVariableType_Raw */
-/** @typedef {{ dataType: 'date'; format: SupportedDateFormats; min: string; max: string; }} KeyVariableType_Date */
-/** @typedef {{ dataType: 'time'; format: SupportedTimeFormats; }} KeyVariableType_Time */
+/** @typedef {{ dataType: 'date'; format: string; min: string; max: string; }} KeyVariableType_Date */
+/** @typedef {{ dataType: 'time'; format: string; }} KeyVariableType_Time */
 /** @typedef {{ dataType: 'number'; min: string; max: string; }} KeyVariableType_Number */
 /** @typedef {{ dataType: 'hex'; min: string; max: string; }} KeyVariableType_Hexadecimal */
 /** @typedef {{ dataType: 'alpha'; min: string; max: string; }} KeyVariableType_Alphabetical */
 /** @typedef {KeyVariableType_Raw|KeyVariableType_Date|KeyVariableType_Time|KeyVariableType_Number|KeyVariableType_Hexadecimal|KeyVariableType_Alphabetical} KeyVariableType */
 
+const monthList = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 const youTubeMinDate = new Date(1975, 0, 1); // First digital camera
 const genDialog = document.querySelector('dialog');
 
@@ -210,7 +201,7 @@ class DialogState {
                     newEle.dataset['index'] = i;
                     newEle.ariaLabel = newEle.placeholder = 'Time';
                     newEle.type = 'time';
-                    newEle.step = ele.format.includes('S') ? '1' : ele.format.includes('M') ? '60' : '3600';
+                    newEle.step = ele.format.includes('S') ? '1' : ele.format.includes('m') ? '60' : '3600';
                     newEle.required = true;
                     newEle.onkeydown = () => this.setOutputState.bind(this)('default');
                     newEle.onchange = this.handleInputChange.bind(this);
@@ -370,7 +361,7 @@ class DialogState {
                 }
                 case 'time': {
                     const result = Utils.generateRandomTime(youTubeMinDate, new Date());
-                    ele.value = inputEle.value = Utils.formatTime(result, 'HH:MM:SS');
+                    ele.value = inputEle.value = Utils.formatTime(result, 'HH:mm:SS');
                     break;
                 }
                 case 'number': {
@@ -424,55 +415,50 @@ class Utils {
      * @returns {KeyVariableType};
      */
     static detectVariableType (v, min, max) {
-        switch (v) {
-            case 'YYYYMMDD':
-            case 'YYYY MM DD':
-                return { dataType: 'date', format: v, min: min, max: max };
-            case 'HHMMSS':
-                return { dataType: 'time', format: v };
-            case 'X':
-            case 'XX':
-            case 'XXX':
-            case 'XXXX':
-            case 'XXXXX':
-            case 'XXXXXX':
-            case 'XXXXXXX':
-            case 'XXXXXXXX':
-            case 'XXXXXXXXX':
-            case 'XXXXXXXXXX':
-                return { dataType: 'number', min: min ?? '0', max: max ?? v.replaceAll('X', 9) };
-            case 'F':
-            case 'FF':
-            case 'FFF':
-            case 'FFFF':
-                return { dataType: 'hex', min: min ?? '0', max: max ?? v.replaceAll('F', 'F') };
-            case 'A':
-            case 'AA':
-            case 'AAA':
-            case 'AAAA':
-                return { dataType: 'alpha', min: min ?? 'A', max: max ?? v.replaceAll('A', 'Z') };
-            default:
-                return { dataType: 'raw', text: v };
+        if (v.match(/Y|M|D/)) {
+            return { dataType: 'date', format: v, min: min, max: max };
+        }
+        else if (v.match(/H|m|S/)) {
+            return { dataType: 'time', format: v };
+        }
+        else if (v.match('X')) {
+            return { dataType: 'number', min: min ?? '0', max: max ?? v.replaceAll('X', 9) };
+        }
+        else if (v.match('F')) {
+            return { dataType: 'hex', min: min ?? '0', max: max ?? v.replaceAll('F', 'F') };
+        }
+        else if (v.match('A')) {
+            return { dataType: 'alpha', min: min ?? 'A', max: max ?? v.replaceAll('A', 'Z') };
+        }
+        else {
+            return { dataType: 'raw', text: v };
         }
     }
 
-    /** @param {Date} d; @param {SupportedDateFormats} format */
+    /** @param {Date} d; @param {string} format */
     static formatDate (d, format) {
         const year = d.getFullYear().toString();
         const month = (d.getMonth() + 1).toString();
         const day = d.getDate().toString();
 
-        switch (format) {
-            case 'YYYYMMDD':
-                return `${year.padStart(4, '0')}${month.padStart(2, '0')}${day.padStart(2, '0')}`;
-            case 'YYYY-MM-DD':
-                return `${year.padStart(4, '0')}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
-            case 'YYYY MM DD':
-                return `${year.padStart(4, '0')} ${month.padStart(2, '0')} ${day.padStart(2, '0')}`;
-            default:
-                alert(`Unsupported date format ${format}. Defaulting to YYYYMMDD`);
-                return `${year.padStart(4, '0')}${month.padStart(2, '0')}${day.padStart(2, '0')}`;
-        }
+        // Year
+        let result = format;
+        result = result.replaceAll('YYYY', year);
+        result = result.replaceAll('YYY', year.substring(1, 4));
+        result = result.replaceAll('YY', year.substring(2, 4));
+        result = result.replaceAll('YY', year.substring(3, 4));
+
+        // Month
+        result = result.replaceAll('MMMM', monthList[month - 1]);
+        result = result.replaceAll('MMM', monthList[month - 1].substring(0, 3));
+        result = result.replaceAll('MM', month.padStart(2, '0'));
+        result = result.replaceAll('M', month);
+
+        // Day
+        result = result.replaceAll('DD', day.padStart(2, '0'));
+        result = result.replaceAll('D', day);
+
+        return result;
     }
 
     /** @param {Date} d; @param {SupportedTimeFormats} format */
@@ -481,15 +467,20 @@ class Utils {
         const minute = d.getMinutes().toString();
         const second = d.getSeconds().toString();
 
-        switch (format) {
-            case 'HHMMSS':
-                return `${hour.padStart(2, '0')}${minute.padStart(2, '0')}${second.padStart(2, '0')}`;
-            case 'HH:MM:SS':
-                return `${hour.padStart(2, '0')}:${minute.padStart(2, '0')}:${second.padStart(2, '0')}`;
-            default:
-                alert(`Unsupported time format ${format}. Defaulting to HHMMSS`);
-                return `${hour.padStart(2, '0')}${minute.padStart(2, '0')}${second.padStart(2, '0')}`;
-        }
+        // Hour
+        let result = format;
+        result = result.replaceAll('HH', hour.padStart(2, '0'));
+        result = result.replaceAll('H', hour);
+
+        // Minute
+        result = result.replaceAll('mm', minute.padStart(2, '0'));
+        result = result.replaceAll('m', minute);
+
+        // Second
+        result = result.replaceAll('SS', second.padStart(2, '0'));
+        result = result.replaceAll('S', second);
+
+        return result;
     }
 
     /** @param {Date} min; @param {Date} max */
