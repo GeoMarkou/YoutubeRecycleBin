@@ -525,4 +525,36 @@ class Utils {
     }
 }
 
+class AdHoc {
+    // Archive of script used to scrape 90% of data from the google doc
+    ScrapeGoogleDoc() {
+        [ ...document.querySelectorAll('.list') ].map((ele, i) => `
+            <tbody>
+                <tr>
+                    <th scope="rowgroup" colspan="5"><h3 id="tbl-${i}">${ele.previousElementSibling.innerText}</h3></th>
+                </tr>
+                ${ [ ...ele.querySelectorAll('.c8') ].map(ele => `
+                <tr>
+                    <td class="keyphrase">${[ ...ele.querySelectorAll('.c1:not(.c3):not(.c10):not(.c5):not(.c13):not(.c6)') ].map(ele => ele.classList.contains('c7') ? `<var>${ele.innerText.replaceAll('\n', '')}</var>` : ele.innerText.replaceAll('\n', '')).join('').trim()}</td>
+                    <td class="example"></td>
+                    <td class="info">${[ ...ele.querySelectorAll('.c3, .c5, .c6, .c14') ].map(ele => ele.innerText.trim()).join(' - ').trim()}</td>
+                    <td class="credit">${[ ...ele.querySelectorAll('.c10 a') ].map(ele => `<a target="_blank" href="${(new URL(ele.href)).searchParams.get('q')}">${ele.innerText.trim()}</a>`)}</td>
+                    <td class="generate"></td>
+                </tr>`).join('\n') }
+            </tbody>`).join('\n');
+    }
+
+    // Find all the rows that have multiple variables inside them - sometimes a mistake
+    FindMultivarFunctions() {
+        [ ...document.querySelectorAll('td:has(var~var)') ].map(ele => ele.outerHTML).join('\n')
+    }
+
+    // The google doc is a bit weird that sometimes it merges multiple paragraphs into one
+    // and our tool script above would treat it as 1 really long weird search... this finds
+    // those elements so we can manually fix it. There was like 40 ish
+    FindMergedOriginalParagraphs() {
+        [ ...document.querySelectorAll('.c8') ].filter(ele => [ ...ele.children ].filter(ele => ele.innerText.trim() && ele.className === 'c1').length > 1)
+    }
+}
+
 new MainPage().init();
