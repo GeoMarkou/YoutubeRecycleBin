@@ -3,14 +3,12 @@
 /*
 todo:
 more data
-pattern bug with decimal mismatch
-[F] hexadecimal support
 YYYY MM
-[A]lphanumeric
 MMMM D, YYYY
 YYMMDD
 MMMM DD, YYYY
 DD MMM
+Not hard coded formats - auto detect length
 
 stretch:
 min/max config for random dice roll
@@ -22,8 +20,16 @@ sorting columns
 
 /** @typedef {'YYYYMMDD'|'YYYY-MM-DD'|'YYYY MM DD'} SupportedDateFormats */
 /** @typedef {'HHMMSS'|'HH:MM:SS'} SupportedTimeFormats */
-/** @typedef {{ dataType: 'raw'; text: string; }|{ dataType: 'date'; format: SupportedDateFormats; min: string; max: string; }|{ dataType: 'time'; format: SupportedTimeFormats; }|{ dataType: 'number'; min: string; max: string; }} KeyVariableType */
-/** @typedef {{ open: boolean; stringParts: Array<string|KeyVariableType>; }}  */
+/** @typedef {'X'|'XX'|'XXX'|'XXXX'} SupportedNumberFormats */
+/** @typedef {'F'|'FF'|'FFF'} SupportedHexadecimalFormats */
+/** @typedef {'A'} SupportedAlphabeticalFormats */
+/** @typedef {{ dataType: 'raw'; text: string; }} KeyVariableType_Raw */
+/** @typedef {{ dataType: 'date'; format: SupportedDateFormats; min: string; max: string; }} KeyVariableType_Date */
+/** @typedef {{ dataType: 'time'; format: SupportedTimeFormats; }} KeyVariableType_Time */
+/** @typedef {{ dataType: 'number'; min: string; max: string; }} KeyVariableType_Number */
+/** @typedef {{ dataType: 'hex'; min: string; max: string; }} KeyVariableType_Hexadecimal */
+/** @typedef {{ dataType: 'alpha'; min: string; max: string; }} KeyVariableType_Alphabetical */
+/** @typedef {KeyVariableType_Raw|KeyVariableType_Date|KeyVariableType_Time|KeyVariableType_Number|KeyVariableType_Hexadecimal|KeyVariableType_Alphabetical} KeyVariableType */
 
 const youTubeMinDate = new Date(1975, 0, 1); // First digital camera
 const genDialog = document.querySelector('dialog');
@@ -219,7 +225,34 @@ class DialogState {
                     newEle.style.minWidth = `${maxLength + 2}em`;
                     newEle.type = 'text';
                     newEle.inputMode = 'numeric';
-                    newEle.pattern = `[0-9]{${maxLength}}`
+                    newEle.maxLength = maxLength;
+                    newEle.required = true;
+                    newEle.onkeydown = () => this.setOutputState.bind(this)('default');
+                    newEle.onchange = this.handleInputChange.bind(this);
+                    contentEle.appendChild(newEle);
+                    break;
+                }
+                case 'hex': {
+                    const maxLength = ele.max.toString().length;
+                    const newEle = document.createElement('input');
+                    newEle.dataset['index'] = i;
+                    newEle.ariaLabel = newEle.placeholder = `${ele.min}-${ele.max}`;
+                    newEle.style.minWidth = `${maxLength + 2}em`;
+                    newEle.type = 'text';
+                    newEle.maxLength = maxLength;
+                    newEle.required = true;
+                    newEle.onkeydown = () => this.setOutputState.bind(this)('default');
+                    newEle.onchange = this.handleInputChange.bind(this);
+                    contentEle.appendChild(newEle);
+                    break;
+                }
+                case 'alpha': {
+                    const maxLength = ele.max.toString().length;
+                    const newEle = document.createElement('input');
+                    newEle.dataset['index'] = i;
+                    newEle.ariaLabel = newEle.placeholder = `${ele.min}-${ele.max}`;
+                    newEle.style.minWidth = `${maxLength + 2}em`;
+                    newEle.type = 'text';
                     newEle.maxLength = maxLength;
                     newEle.required = true;
                     newEle.onkeydown = () => this.setOutputState.bind(this)('default');
@@ -303,6 +336,14 @@ class DialogState {
                     newParams.push(inputEle.value);
                     break;
                 }
+                case 'hex': {
+                    newParams.push(inputEle.value);
+                    break;
+                }
+                case 'alpha': {
+                    newParams.push(inputEle.value);
+                    break;
+                }
                 default: {
                     alert(`Unsupported data ${JSON.stringify(ele)}`);
                     break;
@@ -338,6 +379,18 @@ class DialogState {
                     ele.value = inputEle.value = result.toString().padStart(minNumberOfDigits, '0');
                     break;
                 }
+                case 'hex': {
+                    const result = Utils.generateRandomHex(ele.min, ele.max);
+                    const minNumberOfDigits = ele.min.length;
+                    ele.value = inputEle.value = result.toString().padStart(minNumberOfDigits, '0');
+                    break;
+                }
+                case 'alpha': {
+                    const result = Utils.generateRandomAlpha(ele.min, ele.max);
+                    const minNumberOfDigits = ele.min.length;
+                    ele.value = inputEle.value = result.toString().padStart(minNumberOfDigits, 'A');
+                    break;
+                }
                 case 'raw': {
                     break;
                 }
@@ -347,8 +400,6 @@ class DialogState {
                 }
             }
         }
-
-        this.generateOutput();
     }
 
     /** @param {InputEvent} e */
@@ -390,6 +441,16 @@ class Utils {
             case 'XXXXXXXXX':
             case 'XXXXXXXXXX':
                 return { dataType: 'number', min: min ?? '0', max: max ?? v.replaceAll('X', 9) };
+            case 'F':
+            case 'FF':
+            case 'FFF':
+            case 'FFFF':
+                return { dataType: 'hex', min: min ?? '0', max: max ?? v.replaceAll('F', 'F') };
+            case 'A':
+            case 'AA':
+            case 'AAA':
+            case 'AAAA':
+                return { dataType: 'alpha', min: min ?? 'A', max: max ?? v.replaceAll('A', 'Z') };
             default:
                 return { dataType: 'raw', text: v };
         }
@@ -443,6 +504,26 @@ class Utils {
     /** @param {number} min; @param {number} max */
     static generateRandomNumber (min, max) {
         return Math.round(min + Math.random() * (max - min));
+    }
+
+    /** @param {string} min; @param {string} max */
+    static generateRandomHex (min, max) {
+        const minInt = Number.parseInt(min, 16);
+        const maxInt = Number.parseInt(max, 16);
+        const rand = Utils.generateRandomNumber(minInt, maxInt);
+        return rand.toString(16);
+    }
+
+    /** @param {string} min; @param {string} max */
+    static generateRandomAlpha (min, max) {
+        let result = '';
+        for (let i = 0; i < max.length; i++) {
+            const minInt = min.charCodeAt(i);
+            const maxInt = max.charCodeAt(i);
+            const rand = Utils.generateRandomNumber(minInt, maxInt);
+            result += String.fromCharCode(rand);
+        }
+        return result;
     }
 
     /** @param {string} search_query */
