@@ -441,23 +441,23 @@ class Utils {
         const month = (d.getMonth() + 1).toString();
         const day = d.getDate().toString();
 
-        // Year
-        let result = format;
-        result = result.replaceAll('YYYY', year);
-        result = result.replaceAll('YYY', year.substring(1, 4));
-        result = result.replaceAll('YY', year.substring(2, 4));
-        result = result.replaceAll('YY', year.substring(3, 4));
+        const tokens = {
+            // Year
+            'YYYY': year,
+            'YY': year.substring(2, 4),
 
-        // Month
-        result = result.replaceAll('MMMM', monthList[month - 1]);
-        result = result.replaceAll('MMM', monthList[month - 1].substring(0, 3));
-        result = result.replaceAll('MM', month.padStart(2, '0'));
-        result = result.replaceAll('M', month);
+            // Month
+            'MMMM': monthList[month - 1],
+            'MMM': monthList[month - 1].substring(0, 3),
+            'MM': month.padStart(2, '0'),
+            'M': month,
 
-        // Day
-        result = result.replaceAll('DD', day.padStart(2, '0'));
-        result = result.replaceAll('D', day);
-
+            // Day
+            'DD': day.padStart(2, '0'),
+            'D': day,
+        };
+        
+        const result = format.replace(/YYYY|YY|MMMM|MMM|MM|M|DD|D/g, match => tokens[match]);
         return result;
     }
 
@@ -467,19 +467,21 @@ class Utils {
         const minute = d.getMinutes().toString();
         const second = d.getSeconds().toString();
 
-        // Hour
-        let result = format;
-        result = result.replaceAll('HH', hour.padStart(2, '0'));
-        result = result.replaceAll('H', hour);
+        const tokens = {
+            // Hour
+            'HH': hour.padStart(2, '0'),
+            'H': hour,
 
-        // Minute
-        result = result.replaceAll('mm', minute.padStart(2, '0'));
-        result = result.replaceAll('m', minute);
+            // Minute
+            'mm': minute.padStart(2, '0'),
+            'm': minute,
 
-        // Second
-        result = result.replaceAll('SS', second.padStart(2, '0'));
-        result = result.replaceAll('S', second);
-
+            // Second
+            'SS': second.padStart(2, '0'),
+            'S': second,
+        };
+        
+        const result = format.replace(/HH|mm|SS/g, match => tokens[match]);
         return result;
     }
 
