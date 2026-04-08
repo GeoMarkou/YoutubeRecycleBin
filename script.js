@@ -300,6 +300,8 @@ class DialogState {
             return;
         }
 
+        Utils.playSound('morrowindWhoosh');
+        
         let newParams = [];
         for (let i = 0; i < this.parts.length; i++) {
             /** @type {HTMLInputElement} */
@@ -524,6 +526,18 @@ class Utils {
         const newLink = new URL('https://www.youtube.com/results');
         newLink.searchParams.append('search_query', search_query);
         return newLink.toString();
+    }
+
+    static morrowindWhoosh = new Audio('morrowind whoosh lq.mp3');
+
+    /** @param {'morrowindWhoosh'} sound */
+    static playSound (sound) {
+        switch (sound) {
+            case 'morrowindWhoosh':
+                Utils.morrowindWhoosh.loop = false;
+                Utils.morrowindWhoosh.currentTime = 0;
+                Utils.morrowindWhoosh.play();
+        }
     }
 }
 
